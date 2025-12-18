@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { tmdbClient } from '@/lib/api/tmdb';
-import { isAppError, ValidationError } from '@/lib/errors';
+import { ValidationError } from '@/lib/errors';
+import { handleRouteError, parseNumericId } from '@/lib/api/route-utils';
 import type { TVShowDetails } from '@/types/tmdb';
 
 interface RouteParams {
@@ -13,27 +14,15 @@ export async function GET(
 ): Promise<NextResponse<TVShowDetails | { error: string }>> {
   try {
     const { id } = await params;
-    const showId = parseInt(id, 10);
+    const showId = parseNumericId(id);
 
-    if (isNaN(showId) || showId <= 0) {
+    if (!showId) {
       throw new ValidationError('Invalid TV show ID');
     }
 
     const show = await tmdbClient.getTVShow(showId);
     return NextResponse.json(show);
   } catch (error) {
-    console.error('TMDB TV show error:', error);
-
-    if (isAppError(error)) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to fetch TV show details' },
-      { status: 500 }
-    );
+    return handleRouteError(error, 'TMDB TV show', 'Failed to fetch TV show details');
   }
 }

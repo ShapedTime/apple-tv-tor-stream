@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { tmdbClient } from '@/lib/api/tmdb';
-import { isAppError, ValidationError } from '@/lib/errors';
+import { ValidationError } from '@/lib/errors';
+import { handleRouteError, parseNumericId } from '@/lib/api/route-utils';
 import type { MovieDetails } from '@/types/tmdb';
 
 interface RouteParams {
@@ -13,27 +14,15 @@ export async function GET(
 ): Promise<NextResponse<MovieDetails | { error: string }>> {
   try {
     const { id } = await params;
-    const movieId = parseInt(id, 10);
+    const movieId = parseNumericId(id);
 
-    if (isNaN(movieId) || movieId <= 0) {
+    if (!movieId) {
       throw new ValidationError('Invalid movie ID');
     }
 
     const movie = await tmdbClient.getMovie(movieId);
     return NextResponse.json(movie);
   } catch (error) {
-    console.error('TMDB movie error:', error);
-
-    if (isAppError(error)) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to fetch movie details' },
-      { status: 500 }
-    );
+    return handleRouteError(error, 'TMDB movie', 'Failed to fetch movie details');
   }
 }

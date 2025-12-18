@@ -12,24 +12,7 @@ import {
   CastCarousel,
   CastCarouselSkeleton,
 } from '@/components/media';
-import { Button, AlertCircleIcon } from '@/components/ui';
-
-function ErrorState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] px-4">
-      <div className="text-center max-w-md">
-        <AlertCircleIcon size={48} className="mx-auto mb-4 text-text-muted" />
-        <h2 className="text-xl font-semibold text-white mb-2">
-          Unable to load movie
-        </h2>
-        <p className="text-text-secondary mb-6">{message}</p>
-        <Button variant="secondary" onClick={() => window.history.back()}>
-          Go Back
-        </Button>
-      </div>
-    </div>
-  );
-}
+import { ErrorState } from '@/components/ui';
 
 function LoadingState() {
   return (
@@ -54,24 +37,22 @@ export default function MoviePage() {
   const handleSearchTorrents = useCallback(() => {
     if (!movie || !movieId) return;
 
-    const releaseYear = movie.releaseDate
-      ? parseInt(movie.releaseDate.substring(0, 4), 10)
-      : undefined;
-    const query = releaseYear ? `${movie.title} ${releaseYear}` : movie.title;
+    const year = extractYear(movie.releaseDate) ?? undefined;
+    const query = year ? `${movie.title} ${year}` : movie.title;
 
     setTorrentContext({
       mediaType: 'movie',
       query,
       title: movie.title,
       tmdbId: movieId,
-      year: releaseYear,
+      year,
     });
     setIsTorrentModalOpen(true);
   }, [movie, movieId]);
 
   // Invalid ID state
   if (!movieId || isNaN(movieId)) {
-    return <ErrorState message="Invalid movie ID" />;
+    return <ErrorState title="Unable to load movie" message="Invalid movie ID" />;
   }
 
   // Loading state
@@ -81,12 +62,12 @@ export default function MoviePage() {
 
   // Error state
   if (error) {
-    return <ErrorState message={error} />;
+    return <ErrorState title="Unable to load movie" message={error} />;
   }
 
   // No data state
   if (!movie) {
-    return <ErrorState message="Movie not found" />;
+    return <ErrorState title="Unable to load movie" message="Movie not found" />;
   }
 
   // Format metadata

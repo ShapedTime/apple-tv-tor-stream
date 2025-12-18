@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { tmdbClient } from '@/lib/api/tmdb';
-import { isAppError, ValidationError } from '@/lib/errors';
+import { ValidationError } from '@/lib/errors';
+import { handleRouteError } from '@/lib/api/route-utils';
 import type { SearchResult } from '@/types/tmdb';
 
 export async function GET(
@@ -17,15 +18,6 @@ export async function GET(
     const results = await tmdbClient.search(query);
     return NextResponse.json(results);
   } catch (error) {
-    console.error('TMDB search error:', error);
-
-    if (isAppError(error)) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode }
-      );
-    }
-
-    return NextResponse.json({ error: 'Search failed' }, { status: 500 });
+    return handleRouteError(error, 'TMDB search', 'Search failed');
   }
 }

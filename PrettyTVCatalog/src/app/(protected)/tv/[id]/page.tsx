@@ -16,24 +16,7 @@ import {
   EpisodeList,
   EpisodeListSkeleton,
 } from '@/components/media';
-import { Button, AlertCircleIcon } from '@/components/ui';
-
-function ErrorState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[50vh] px-4">
-      <div className="text-center max-w-md">
-        <AlertCircleIcon size={48} className="mx-auto mb-4 text-text-muted" />
-        <h2 className="text-xl font-semibold text-white mb-2">
-          Unable to load TV show
-        </h2>
-        <p className="text-text-secondary mb-6">{message}</p>
-        <Button variant="secondary" onClick={() => window.history.back()}>
-          Go Back
-        </Button>
-      </div>
-    </div>
-  );
-}
+import { ErrorState } from '@/components/ui';
 
 function LoadingState() {
   return (
@@ -82,9 +65,7 @@ export default function TVShowPage() {
   const handleSearchTorrents = useCallback(() => {
     if (!show || !showId) return;
 
-    const year = show.firstAirDate
-      ? parseInt(show.firstAirDate.substring(0, 4), 10)
-      : undefined;
+    const year = extractYear(show.firstAirDate) ?? undefined;
 
     setTorrentContext({
       mediaType: 'tv',
@@ -104,9 +85,7 @@ export default function TVShowPage() {
       // Parse season and episode from query format "ShowName S01E05"
       const match = query.match(/S(\d+)E(\d+)/i);
 
-      const year = show.firstAirDate
-        ? parseInt(show.firstAirDate.substring(0, 4), 10)
-        : undefined;
+      const year = extractYear(show.firstAirDate) ?? undefined;
 
       setTorrentContext({
         mediaType: 'episode',
@@ -124,7 +103,7 @@ export default function TVShowPage() {
 
   // Invalid ID state
   if (!showId || isNaN(showId)) {
-    return <ErrorState message="Invalid TV show ID" />;
+    return <ErrorState title="Unable to load TV show" message="Invalid TV show ID" />;
   }
 
   // Loading state
@@ -134,12 +113,12 @@ export default function TVShowPage() {
 
   // Error state
   if (showError) {
-    return <ErrorState message={showError} />;
+    return <ErrorState title="Unable to load TV show" message={showError} />;
   }
 
   // No data state
   if (!show) {
-    return <ErrorState message="TV show not found" />;
+    return <ErrorState title="Unable to load TV show" message="TV show not found" />;
   }
 
   // Format metadata

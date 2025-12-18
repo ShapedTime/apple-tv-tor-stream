@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { tmdbClient } from '@/lib/api/tmdb';
-import { isAppError, ValidationError } from '@/lib/errors';
+import { ValidationError } from '@/lib/errors';
+import { handleRouteError, parseNumericId } from '@/lib/api/route-utils';
 import type { SeasonDetails } from '@/types/tmdb';
 
 interface RouteParams {
@@ -13,13 +14,13 @@ export async function GET(
 ): Promise<NextResponse<SeasonDetails | { error: string }>> {
   try {
     const { id, season } = await params;
-    const showId = parseInt(id, 10);
-    const seasonNumber = parseInt(season, 10);
+    const showId = parseNumericId(id);
 
-    if (isNaN(showId) || showId <= 0) {
+    if (!showId) {
       throw new ValidationError('Invalid TV show ID');
     }
 
+    const seasonNumber = parseInt(season, 10);
     if (isNaN(seasonNumber) || seasonNumber < 0) {
       throw new ValidationError('Invalid season number');
     }
@@ -27,18 +28,6 @@ export async function GET(
     const seasonDetails = await tmdbClient.getSeason(showId, seasonNumber);
     return NextResponse.json(seasonDetails);
   } catch (error) {
-    console.error('TMDB season error:', error);
-
-    if (isAppError(error)) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to fetch season details' },
-      { status: 500 }
-    );
+    return handleRouteError(error, 'TMDB season', 'Failed to fetch season details');
   }
 }

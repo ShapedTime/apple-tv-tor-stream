@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jackettClient } from '@/lib/api/jackett';
-import { isAppError, ValidationError } from '@/lib/errors';
+import { ValidationError } from '@/lib/errors';
+import { handleRouteError } from '@/lib/api/route-utils';
 import type { JackettSearchResponse } from '@/types/jackett';
 import type { TorznabCategory } from '@/config/jackett';
 
@@ -23,18 +24,6 @@ export async function GET(
       query: query.trim(),
     });
   } catch (error) {
-    console.error('Jackett search error:', error);
-
-    if (isAppError(error)) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Torrent search failed' },
-      { status: 500 }
-    );
+    return handleRouteError(error, 'Jackett search', 'Torrent search failed');
   }
 }

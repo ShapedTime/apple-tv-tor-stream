@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { distribytedClient } from '@/lib/api/distribyted';
-import { isAppError, ValidationError } from '@/lib/errors';
+import { ValidationError } from '@/lib/errors';
+import { handleRouteError } from '@/lib/api/route-utils';
 import type { TMDBMetadata } from '@/types/distribyted';
 
 interface AddTorrentBody {
@@ -24,18 +25,6 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Distribyted add error:', error);
-
-    if (isAppError(error)) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to add torrent' },
-      { status: 500 }
-    );
+    return handleRouteError(error, 'Distribyted add', 'Failed to add torrent');
   }
 }
