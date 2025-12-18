@@ -316,7 +316,7 @@ After=docker.service network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/opt/streaming-stack
+WorkingDirectory=/opt/streaming-stack/apple-tv-tor-stream
 ExecStart=/usr/bin/docker compose up -d
 ExecStop=/usr/bin/docker compose down
 TimeoutStartSec=0
