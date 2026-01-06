@@ -1,0 +1,37 @@
+# Caddy configuration for momoshtrem WebDAV
+# Provides: HTTPS via Let's Encrypt, HTTP Basic Auth, Reverse Proxy
+#
+# SETUP:
+# 1. Replace YOUR_SUBDOMAIN with your DuckDNS subdomain
+# 2. Set DUCKDNS_TOKEN in .env
+# 3. Add pihole DNS: YOUR_SUBDOMAIN.duckdns.org -> VM local IP
+
+YOUR_SUBDOMAIN.duckdns.org {
+    # TLS via Let's Encrypt with DuckDNS DNS challenge
+    tls {
+        dns duckdns {env.DUCKDNS_TOKEN}
+    }
+
+    # HTTP Basic Authentication
+    # Generate password hash with:
+    #   docker run --rm caddy:2-alpine caddy hash-password --plaintext "YourStrongPassword"
+    basicauth * {
+        momosh $2a$14$ZHPCCCNMzJVMvYD4aofDJu3fIMnhzH.K6EUmtmoZXgPGe7lJNBfSy
+    }
+
+    # Reverse proxy to momoshtrem WebDAV
+    reverse_proxy momoshtrem:36911
+
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer"
+        -Server
+    }
+
+    log {
+        output stdout
+        format json
+    }
+}
