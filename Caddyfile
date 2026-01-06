@@ -6,7 +6,7 @@
 # 2. Set DUCKDNS_TOKEN in .env
 # 3. Add pihole DNS: YOUR_SUBDOMAIN.duckdns.org -> VM local IP
 
-momosh.duckdns.org {
+momoshtrem.duckdns.org {
     # TLS via Let's Encrypt with DuckDNS DNS challenge
     tls {
         dns duckdns {env.DUCKDNS_TOKEN}
