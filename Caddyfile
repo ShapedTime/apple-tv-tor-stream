@@ -25,3 +25,16 @@ momoshtrem.duckdns.org:36911 {
         output stdout
     }
 }
+
+
+momoshtrem.duckdns.org:3000 {
+    # Self-signed certificate from Caddy's internal CA
+    tls internal
+
+    # Reverse proxy to momoshtrem WebDAV
+    reverse_proxy prettytvcatalog:3000
+
+    log {
+        output stdout
+    }
+}
