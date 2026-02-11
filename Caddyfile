@@ -39,14 +39,14 @@ momoshtrem.duckdns.org:3000 {
     }
 }
 
-tv.home:9090 {
+http://tv.home:9090 {
     reverse_proxy momoshtrem:9090
     @denied not remote_ip 192.168.0.0/24
     abort @denied
 }
 
 
-192.168.0.81:9090 {
+http://192.168.0.81:9090 {
     reverse_proxy momoshtrem:9090
     @denied not remote_ip 192.168.0.0/24
     abort @denied
