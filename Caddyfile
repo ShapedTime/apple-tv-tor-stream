@@ -41,6 +41,6 @@ momoshtrem.duckdns.org:3000 {
 
 tv.home:9090 {
     reverse_proxy momoshtrem:9090
-    @denied not remote_ip 192.168.1.0/24
+    @denied not remote_ip 192.168.0.0/24
     abort @denied
 }
